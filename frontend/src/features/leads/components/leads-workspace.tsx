@@ -1,11 +1,20 @@
 "use client";
 
-import { type ReactNode, useMemo } from "react";
+import { Plus } from "lucide-react";
+import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 import { AppHeader } from "@/components/common/app-header";
+import { KeyCombo } from "@/components/common/kbd";
 import { ThemeToggle } from "@/components/common/theme-toggle";
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { COPY } from "@/config/copy";
+import { TIMING } from "@/config/limits";
+import { SHORTCUTS } from "@/config/shortcuts";
 import { LeadSheet } from "@/features/lead-detail/components/lead-sheet";
 import { isPinned } from "@/features/leads/cache";
+import { AddLeadDialog } from "@/features/leads/components/add-lead-dialog";
 import { FollowUpsSection } from "@/features/leads/components/follow-ups-section";
 import { LeadFilters } from "@/features/leads/components/lead-filters";
 import { LeadList } from "@/features/leads/components/lead-list";
@@ -19,12 +28,30 @@ import { useLeadParam } from "@/features/leads/hooks/use-lead-param";
 import { useLeadStats } from "@/features/leads/hooks/use-lead-stats";
 import { useLeads } from "@/features/leads/hooks/use-leads";
 import { useNow } from "@/hooks/use-now";
+import type { Lead } from "@/lib/api/types";
 
 function WorkspaceMain({ children }: { children: ReactNode }) {
   return (
     <main className="mx-auto flex max-w-[1120px] flex-col gap-6 px-4 pt-5 pb-24 sm:px-6 sm:pt-8">
       {children}
     </main>
+  );
+}
+
+function AddLeadButton({ onClick }: { onClick: () => void }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button onClick={onClick}>
+          <Plus aria-hidden />
+          {COPY.actions.addLead}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>
+        {SHORTCUTS.newLead.description}
+        <KeyCombo keys={SHORTCUTS.newLead.keys} tone="inverted" />
+      </TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -41,6 +68,8 @@ export function LeadsWorkspaceFallback() {
 
 export function LeadsWorkspace() {
   const now = useNow();
+  const [addOpen, setAddOpen] = useState(false);
+  const [highlightedLeadId, setHighlightedLeadId] = useState<string | null>(null);
   const { status, search, filters, hasFilters, setStatus, setSearch, clearFilters } =
     useLeadFilters();
   const { openLead } = useLeadParam();
@@ -68,11 +97,34 @@ export function LeadsWorkspace() {
   const listCount =
     filteredTotal === undefined ? undefined : Math.max(0, filteredTotal - pinnedCount);
 
+  useEffect(() => {
+    if (highlightedLeadId === null) {
+      return;
+    }
+    const timeout = setTimeout(() => setHighlightedLeadId(null), TIMING.highlightMs);
+    return () => clearTimeout(timeout);
+  }, [highlightedLeadId]);
+
+  const handleCreated = useCallback(
+    (lead: Lead) => {
+      setHighlightedLeadId(lead.id);
+      toast.success(COPY.toasts.leadCreated, {
+        action: { label: COPY.actions.open, onClick: () => void openLead(lead.id) },
+      });
+    },
+    [openLead],
+  );
+
   return (
     <>
       <AppHeader
         search={<LeadSearch value={search} onChange={setSearch} />}
-        actions={<ThemeToggle />}
+        actions={
+          <>
+            <ThemeToggle />
+            <AddLeadButton onClick={() => setAddOpen(true)} />
+          </>
+        }
       />
       <WorkspaceMain>
         <OnboardingHint />
@@ -106,13 +158,21 @@ export function LeadsWorkspace() {
           hasNextPage={leadsQuery.hasNextPage}
           isFetchingNextPage={leadsQuery.isFetchingNextPage}
           now={now}
+          highlightedLeadId={highlightedLeadId}
           onRetry={() => void leadsQuery.refetch()}
           onLoadMore={() => void leadsQuery.fetchNextPage()}
           onOpen={(lead) => void openLead(lead.id)}
+          onAddLead={() => setAddOpen(true)}
           onClearFilters={() => void clearFilters()}
         />
       </WorkspaceMain>
       <LeadSheet />
+      <AddLeadDialog
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        onCreated={handleCreated}
+        onOpenExisting={(leadId) => void openLead(leadId)}
+      />
     </>
   );
 }

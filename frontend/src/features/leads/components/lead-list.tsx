@@ -25,6 +25,7 @@ type LeadListProps = {
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
   now: Date;
+  highlightedLeadId: string | null;
   onRetry: () => void;
   onLoadMore: () => void;
   onOpen: (lead: Lead) => void;
@@ -93,7 +94,14 @@ function ListBody(props: LeadListProps) {
     <>
       <ul className="flex flex-col gap-2">
         {leads.map((lead) => (
-          <LeadRow key={lead.id} lead={lead} now={props.now} variant="list" onOpen={props.onOpen} />
+          <LeadRow
+            key={lead.id}
+            lead={lead}
+            now={props.now}
+            variant="list"
+            highlighted={props.highlightedLeadId === lead.id}
+            onOpen={props.onOpen}
+          />
         ))}
       </ul>
       {props.hasNextPage ? (
