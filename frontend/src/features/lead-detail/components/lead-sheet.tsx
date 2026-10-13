@@ -47,10 +47,11 @@ function SheetLoading() {
 
 function LeadSheetBody({ leadId }: { leadId: string }) {
   const now = useNow();
-  const { closeLead } = useLeadParam();
+  const { openLead, closeLead } = useLeadParam();
   const leadQuery = useLead(leadId);
   const { changeStatus } = useChangeStatus();
   const completeFollowUp = useCompleteFollowUp();
+  const [editing, setEditing] = useState(false);
   const [followUpEnabled, setFollowUpEnabled] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const lead = leadQuery.data;
@@ -82,7 +83,12 @@ function LeadSheetBody({ leadId }: { leadId: string }) {
   return (
     <>
       <header className="border-b px-5 pt-5 pb-4 sm:px-6">
-        <LeadSheetHeader lead={lead} />
+        <LeadSheetHeader
+          lead={lead}
+          editing={editing}
+          onEditingChange={setEditing}
+          onOpenExisting={(existingId) => void openLead(existingId)}
+        />
       </header>
       <div className="flex-1 overflow-y-auto overscroll-contain">
         <div className="flex flex-col gap-4 px-5 pt-4 pb-6 sm:px-6">

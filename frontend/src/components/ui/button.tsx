@@ -16,7 +16,7 @@ const buttonVariants = cva(
         ghost: "text-foreground hover:bg-surface-muted",
         subtle: "text-muted-foreground hover:bg-surface-muted hover:text-foreground",
         danger: "bg-danger text-primary-foreground shadow-xs hover:opacity-90",
-        link: "h-auto px-0 text-primary underline-offset-4 hover:underline",
+        link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
         default: "h-10 px-4 sm:h-9",
@@ -26,6 +26,7 @@ const buttonVariants = cva(
         "icon-sm": "size-10 sm:size-8",
       },
     },
+    compoundVariants: [{ variant: "link", className: "h-auto px-0 sm:h-auto" }],
     defaultVariants: {
       variant: "primary",
       size: "default",

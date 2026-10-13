@@ -1,6 +1,6 @@
 "use client";
 
-import { Copy, Phone, XIcon } from "lucide-react";
+import { Copy, Pencil, Phone, XIcon } from "lucide-react";
 import { toast } from "sonner";
 
 import { LeadAvatar } from "@/components/common/lead-avatar";
@@ -8,10 +8,14 @@ import { Button } from "@/components/ui/button";
 import { SheetClose, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { COPY } from "@/config/copy";
+import { LeadDetailsEditor } from "@/features/lead-detail/components/lead-details-editor";
 import type { Lead } from "@/lib/api/types";
 
 type LeadSheetHeaderProps = {
   lead: Lead;
+  editing: boolean;
+  onEditingChange: (editing: boolean) => void;
+  onOpenExisting: (leadId: string) => void;
 };
 
 async function copyPhone(phone: string): Promise<void> {
@@ -23,7 +27,12 @@ async function copyPhone(phone: string): Promise<void> {
   }
 }
 
-export function LeadSheetHeader({ lead }: LeadSheetHeaderProps) {
+export function LeadSheetHeader({
+  lead,
+  editing,
+  onEditingChange,
+  onOpenExisting,
+}: LeadSheetHeaderProps) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-start gap-3">
@@ -59,6 +68,12 @@ export function LeadSheetHeader({ lead }: LeadSheetHeaderProps) {
           ) : null}
         </div>
         <div className="flex items-center gap-1">
+          {editing ? null : (
+            <Button variant="secondary" size="sm" onClick={() => onEditingChange(true)}>
+              <Pencil aria-hidden />
+              <span className="max-sm:sr-only">{COPY.actions.editDetails}</span>
+            </Button>
+          )}
           <SheetClose asChild>
             <Button variant="ghost" size="icon" aria-label={COPY.actions.close}>
               <XIcon aria-hidden />
@@ -66,6 +81,13 @@ export function LeadSheetHeader({ lead }: LeadSheetHeaderProps) {
           </SheetClose>
         </div>
       </div>
+      {editing ? (
+        <LeadDetailsEditor
+          lead={lead}
+          onDone={() => onEditingChange(false)}
+          onOpenExisting={onOpenExisting}
+        />
+      ) : null}
     </div>
   );
 }
