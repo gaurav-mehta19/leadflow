@@ -3,16 +3,22 @@
 import { CircleCheck } from "lucide-react";
 
 import { EmptyState } from "@/components/common/empty-state";
+import { ErrorState } from "@/components/common/error-state";
 import { SectionHeader } from "@/components/common/section-header";
 import { COPY } from "@/config/copy";
 import { LeadRow } from "@/features/leads/components/lead-row";
+import { FollowUpsSkeleton } from "@/features/leads/components/lead-list-skeleton";
 import type { FollowUps, Lead } from "@/lib/api/types";
 import { cn } from "@/lib/cn";
 
 type FollowUpsSectionProps = {
   data: FollowUps | undefined;
+  error: unknown;
+  isPending: boolean;
+  isRefetching: boolean;
   now: Date;
   completingLeadId: string | null;
+  onRetry: () => void;
   onOpen: (lead: Lead) => void;
   onComplete: (lead: Lead) => void;
 };
@@ -57,11 +63,20 @@ function FollowUpGroup({ id, label, leads, tone, ...rowProps }: GroupProps) {
   );
 }
 
-export function FollowUpsSection({ data, ...rowProps }: FollowUpsSectionProps) {
-  if (!data) {
-    return null;
+export function FollowUpsSection({
+  data,
+  error,
+  isPending,
+  isRefetching,
+  onRetry,
+  ...rowProps
+}: FollowUpsSectionProps) {
+  if (isPending) {
+    return <FollowUpsSkeleton />;
   }
-  const total = data.overdue.length + data.today.length;
+  const overdue = data?.overdue ?? [];
+  const today = data?.today ?? [];
+  const total = overdue.length + today.length;
 
   return (
     <section aria-labelledby="follow-ups-heading" className="flex flex-col gap-3">
@@ -69,11 +84,13 @@ export function FollowUpsSection({ data, ...rowProps }: FollowUpsSectionProps) {
         id="follow-ups-heading"
         title={COPY.sections.followUps}
         subtitle={COPY.sections.followUpsSubtitle}
-        count={total}
+        count={data ? total : undefined}
         countTone={total > 0 ? "danger" : "neutral"}
         countLabel={`${total} due`}
       />
-      {total === 0 ? (
+      {error && !data ? (
+        <ErrorState error={error} onRetry={onRetry} retrying={isRefetching} />
+      ) : total === 0 ? (
         <EmptyState
           layout="inline"
           tone="positive"
@@ -82,20 +99,20 @@ export function FollowUpsSection({ data, ...rowProps }: FollowUpsSectionProps) {
         />
       ) : (
         <div className="flex flex-col gap-4">
-          {data.overdue.length > 0 ? (
+          {overdue.length > 0 ? (
             <FollowUpGroup
               id="follow-ups-overdue"
               label={COPY.sections.overdue}
-              leads={data.overdue}
+              leads={overdue}
               tone="danger"
               {...rowProps}
             />
           ) : null}
-          {data.today.length > 0 ? (
+          {today.length > 0 ? (
             <FollowUpGroup
               id="follow-ups-today"
               label={COPY.sections.today}
-              leads={data.today}
+              leads={today}
               tone="warning"
               {...rowProps}
             />

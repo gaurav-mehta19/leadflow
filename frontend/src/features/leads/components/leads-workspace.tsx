@@ -8,7 +8,9 @@ import { isPinned } from "@/features/leads/cache";
 import { FollowUpsSection } from "@/features/leads/components/follow-ups-section";
 import { LeadFilters } from "@/features/leads/components/lead-filters";
 import { LeadList } from "@/features/leads/components/lead-list";
+import { LeadListSkeleton } from "@/features/leads/components/lead-list-skeleton";
 import { LeadSearch } from "@/features/leads/components/lead-search";
+import { OnboardingHint } from "@/features/leads/components/onboarding-hint";
 import { useCompleteFollowUp } from "@/features/leads/hooks/use-complete-follow-up";
 import { useFollowUps } from "@/features/leads/hooks/use-follow-ups";
 import { useLeadFilters } from "@/features/leads/hooks/use-lead-filters";
@@ -25,9 +27,21 @@ function WorkspaceMain({ children }: { children: ReactNode }) {
   );
 }
 
+export function LeadsWorkspaceFallback() {
+  return (
+    <>
+      <AppHeader />
+      <WorkspaceMain>
+        <LeadListSkeleton />
+      </WorkspaceMain>
+    </>
+  );
+}
+
 export function LeadsWorkspace() {
   const now = useNow();
-  const { status, search, filters, setStatus, setSearch } = useLeadFilters();
+  const { status, search, filters, hasFilters, setStatus, setSearch, clearFilters } =
+    useLeadFilters();
   const { openLead } = useLeadParam();
   const leadsQuery = useLeads(filters);
   const followUpsQuery = useFollowUps(filters);
@@ -60,6 +74,7 @@ export function LeadsWorkspace() {
         actions={<ThemeToggle />}
       />
       <WorkspaceMain>
+        <OnboardingHint />
         <LeadFilters
           status={status}
           stats={stats}
@@ -67,21 +82,33 @@ export function LeadsWorkspace() {
         />
         <FollowUpsSection
           data={followUps}
+          error={followUpsQuery.error}
+          isPending={followUpsQuery.isPending}
+          isRefetching={followUpsQuery.isRefetching}
           now={now}
           completingLeadId={
             completeFollowUp.isPending ? (completeFollowUp.variables ?? null) : null
           }
+          onRetry={() => void followUpsQuery.refetch()}
           onOpen={(lead) => void openLead(lead.id)}
           onComplete={(lead) => completeFollowUp.mutate(lead.id)}
         />
         <LeadList
           leads={listLeads}
           totalCount={listCount}
+          filters={filters}
+          isFirstUse={!hasFilters && stats?.total === 0}
+          hasPinnedMatches={pinnedCount > 0}
+          error={leadsQuery.error}
+          isPending={leadsQuery.isPending}
+          isRefetching={leadsQuery.isRefetching}
           hasNextPage={leadsQuery.hasNextPage}
           isFetchingNextPage={leadsQuery.isFetchingNextPage}
           now={now}
+          onRetry={() => void leadsQuery.refetch()}
           onLoadMore={() => void leadsQuery.fetchNextPage()}
           onOpen={(lead) => void openLead(lead.id)}
+          onClearFilters={() => void clearFilters()}
         />
       </WorkspaceMain>
     </>

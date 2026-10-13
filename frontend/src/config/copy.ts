@@ -24,6 +24,9 @@ export const COPY = {
     toggleTheme: "Toggle theme",
     keyboardShortcuts: "Keyboard shortcuts",
   },
+  loading: {
+    leads: "Loading leads",
+  },
   search: {
     placeholder: "Search leads by name or company",
     label: "Search leads",
