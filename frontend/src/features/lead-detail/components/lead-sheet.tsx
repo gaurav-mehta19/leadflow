@@ -10,8 +10,10 @@ import { COPY } from "@/config/copy";
 import { FollowUpBanner } from "@/features/lead-detail/components/follow-up-banner";
 import { LeadSheetHeader } from "@/features/lead-detail/components/lead-sheet-header";
 import { NoteComposer } from "@/features/lead-detail/components/note-composer";
+import { PipelineStepper } from "@/features/lead-detail/components/pipeline-stepper";
 import { Timeline } from "@/features/lead-detail/components/timeline";
 import { useLead } from "@/features/lead-detail/hooks/use-lead";
+import { useChangeStatus } from "@/features/leads/hooks/use-change-status";
 import { useCompleteFollowUp } from "@/features/leads/hooks/use-complete-follow-up";
 import { useLeadParam } from "@/features/leads/hooks/use-lead-param";
 import { useNow } from "@/hooks/use-now";
@@ -47,6 +49,7 @@ function LeadSheetBody({ leadId }: { leadId: string }) {
   const now = useNow();
   const { closeLead } = useLeadParam();
   const leadQuery = useLead(leadId);
+  const { changeStatus } = useChangeStatus();
   const completeFollowUp = useCompleteFollowUp();
   const [followUpEnabled, setFollowUpEnabled] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -83,6 +86,7 @@ function LeadSheetBody({ leadId }: { leadId: string }) {
       </header>
       <div className="flex-1 overflow-y-auto overscroll-contain">
         <div className="flex flex-col gap-4 px-5 pt-4 pb-6 sm:px-6">
+          <PipelineStepper status={lead.status} onChange={(status) => changeStatus(lead, status)} />
           <FollowUpBanner
             lead={lead}
             now={now}
