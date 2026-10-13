@@ -10,6 +10,7 @@ from app.core.config import Settings
 from app.core.database import Database
 from app.core.timezone import parse_timezone
 from app.services.health_service import HealthService
+from app.services.lead_service import LeadService
 
 
 def get_settings_from_app(request: Request) -> Settings:
@@ -53,3 +54,10 @@ def get_health_service(session: SessionDep) -> HealthService:
 
 
 HealthServiceDep = Annotated[HealthService, Depends(get_health_service)]
+
+
+def get_lead_service(session: SessionDep, clock: ClockDep) -> LeadService:
+    return LeadService(session, clock)
+
+
+LeadServiceDep = Annotated[LeadService, Depends(get_lead_service)]

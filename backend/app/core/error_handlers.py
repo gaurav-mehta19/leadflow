@@ -72,11 +72,11 @@ def _human_message(error: Mapping[str, Any]) -> str:
     match error_type:
         case "missing":
             return "This field is required."
-        case "string_too_short" if context.get("min_length") == 1:
+        case "string_too_short" | "too_short" if context.get("min_length") == 1:
             return "This field can't be empty."
-        case "string_too_short":
+        case "string_too_short" | "too_short":
             return f"Must be at least {context.get('min_length')} characters."
-        case "string_too_long":
+        case "string_too_long" | "too_long":
             return f"Must be at most {context.get('max_length')} characters."
         case "extra_forbidden":
             return "This field isn't allowed."
@@ -118,12 +118,18 @@ async def handle_request_validation_error(request: Request, exc: Exception) -> J
         FieldError(field=_field_path(error.get("loc", ())), message=_human_message(error))
         for error in exc.errors()
     ]
+    request_level = [error for error in errors if error.field in _LOCATION_PREFIXES]
+    detail = (
+        request_level[0].message
+        if request_level and len(request_level) == len(errors)
+        else "One or more fields are invalid."
+    )
     return problem_response(
         request,
         status=422,
         type_slug="validation-error",
         title="Validation failed",
-        detail="One or more fields are invalid.",
+        detail=detail,
         errors=errors,
     )
 
