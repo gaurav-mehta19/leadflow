@@ -6,9 +6,12 @@
 node_modules/
 .next/
 out/
+build/
 coverage/
 *.tsbuildinfo
 next-env.d.ts
+*.pem
+.vercel/
 
 __pycache__/
 *.py[cod]
