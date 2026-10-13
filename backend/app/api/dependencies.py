@@ -9,6 +9,7 @@ from app.core.clock import Clock
 from app.core.config import Settings
 from app.core.database import Database
 from app.core.timezone import parse_timezone
+from app.services.activity_service import ActivityService
 from app.services.health_service import HealthService
 from app.services.lead_service import LeadService
 
@@ -60,4 +61,9 @@ def get_lead_service(session: SessionDep, clock: ClockDep) -> LeadService:
     return LeadService(session, clock)
 
 
+def get_activity_service(session: SessionDep, clock: ClockDep) -> ActivityService:
+    return ActivityService(session, clock)
+
+
 LeadServiceDep = Annotated[LeadService, Depends(get_lead_service)]
+ActivityServiceDep = Annotated[ActivityService, Depends(get_activity_service)]
