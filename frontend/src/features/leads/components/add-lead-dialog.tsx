@@ -36,7 +36,6 @@ export function AddLeadDialog({
           <DialogDescription>{COPY.addLead.description}</DialogDescription>
         </DialogHeader>
         <LeadForm
-          autoFocus
           submitLabel={COPY.actions.createLead}
           pending={createLead.isPending}
           onCancel={() => onOpenChange(false)}

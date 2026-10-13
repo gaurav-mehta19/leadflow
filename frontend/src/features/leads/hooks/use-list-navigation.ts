@@ -39,7 +39,9 @@ export function useListNavigation(ids: readonly string[]) {
         return;
       }
       setSelected(nextId);
-      rows.current.get(nextId)?.scrollIntoView({ block: "nearest", behavior: scrollBehavior() });
+      const row = rows.current.get(nextId);
+      row?.querySelector("button")?.focus({ preventScroll: true });
+      row?.scrollIntoView({ block: "nearest", behavior: scrollBehavior() });
     },
     [ids, selectedId],
   );

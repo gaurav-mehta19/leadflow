@@ -4,7 +4,9 @@ import { XIcon } from "lucide-react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import type { ComponentProps } from "react";
 
+import { keepOpenWhenToastClicked } from "@/components/ui/sonner";
 import { COPY } from "@/config/copy";
+import { useReturnFocus } from "@/hooks/use-return-focus";
 import { cn } from "@/lib/cn";
 
 function Dialog(props: ComponentProps<typeof DialogPrimitive.Root>) {
@@ -36,13 +38,20 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  onOpenAutoFocus,
+  onCloseAutoFocus,
+  onInteractOutside = keepOpenWhenToastClicked,
   ...props
 }: ComponentProps<typeof DialogPrimitive.Content> & { showCloseButton?: boolean }) {
+  const returnFocus = useReturnFocus(onOpenAutoFocus, onCloseAutoFocus);
   return (
     <DialogPrimitive.Portal>
       <DialogOverlay />
       <DialogPrimitive.Content
         data-slot="dialog-content"
+        onOpenAutoFocus={returnFocus.onOpenAutoFocus}
+        onCloseAutoFocus={returnFocus.onCloseAutoFocus}
+        onInteractOutside={onInteractOutside}
         className={cn(
           "fixed top-1/2 left-1/2 z-50 grid max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 gap-5 overflow-y-auto rounded-xl border bg-surface p-6 shadow-float duration-200 ease-out data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
           className,

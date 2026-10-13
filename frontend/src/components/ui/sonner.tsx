@@ -6,6 +6,14 @@ import { Toaster as Sonner } from "sonner";
 
 import { useMediaQuery } from "@/hooks/use-media-query";
 
+const TOASTER_SELECTOR = "[data-sonner-toaster]";
+
+function keepOpenWhenToastClicked(event: Event): void {
+  if (event.target instanceof Element && event.target.closest(TOASTER_SELECTOR)) {
+    event.preventDefault();
+  }
+}
+
 const toastStyle = {
   "--normal-bg": "var(--surface)",
   "--normal-text": "var(--foreground)",
@@ -30,4 +38,4 @@ function Toaster() {
   );
 }
 
-export { Toaster };
+export { keepOpenWhenToastClicked, Toaster };

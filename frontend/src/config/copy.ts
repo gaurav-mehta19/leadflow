@@ -27,6 +27,9 @@ export const COPY = {
   loading: {
     leads: "Loading leads",
   },
+  shortcuts: {
+    description: "Single-key shortcuts pause while you type in a field.",
+  },
   search: {
     placeholder: "Search leads by name or company",
     label: "Search leads",

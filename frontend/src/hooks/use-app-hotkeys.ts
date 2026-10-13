@@ -21,8 +21,14 @@ function isInteractive(event: KeyboardEvent): boolean {
   );
 }
 
+const SELECTION_CONTROLS = ["radio"] as const;
+
 export function useAppHotkeys(handlers: AppHotkeyHandlers, singleKeysEnabled: boolean): void {
-  const singleKey = { enabled: singleKeysEnabled, preventDefault: true };
+  const singleKey = {
+    enabled: singleKeysEnabled,
+    enableOnFormTags: SELECTION_CONTROLS,
+    preventDefault: true,
+  };
 
   useHotkeys(SHORTCUTS.focusSearch.hotkey, handlers.focusSearch, singleKey, [handlers.focusSearch]);
   useHotkeys(SHORTCUTS.newLead.hotkey, handlers.newLead, singleKey, [handlers.newLead]);

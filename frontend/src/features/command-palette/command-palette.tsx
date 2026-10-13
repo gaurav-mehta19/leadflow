@@ -33,6 +33,10 @@ import { leadKeys } from "@/lib/query-keys";
 
 const PALETTE_RESULTS = 8;
 
+function leadItemValue(leadId: string): string {
+  return `lead-${leadId}`;
+}
+
 export type PaletteActions = {
   addLead: () => void;
   showOverdue: () => void;
@@ -94,6 +98,13 @@ export function CommandPalette({ open, onOpenChange, actions }: CommandPalettePr
   );
   const leads = term ? (leadsQuery.data?.items ?? []) : [];
   const searching = term !== query.trim() || leadsQuery.isFetching;
+  const topResult = leads[0] ? leadItemValue(leads[0].id) : (matchingActions[0]?.id ?? "");
+  const [selected, setSelected] = useState(topResult);
+  const [selectedFor, setSelectedFor] = useState(topResult);
+  if (selectedFor !== topResult) {
+    setSelectedFor(topResult);
+    setSelected(topResult);
+  }
 
   function run(action: () => void) {
     onOpenChange(false);
@@ -112,7 +123,12 @@ export function CommandPalette({ open, onOpenChange, actions }: CommandPalettePr
       }}
       title={COPY.palette.placeholder}
       description={COPY.palette.placeholder}
-      commandProps={{ shouldFilter: false, loop: true }}
+      commandProps={{
+        shouldFilter: false,
+        loop: true,
+        value: selected,
+        onValueChange: setSelected,
+      }}
     >
       <CommandInput
         value={query}
@@ -132,7 +148,7 @@ export function CommandPalette({ open, onOpenChange, actions }: CommandPalettePr
             {leads.map((lead) => (
               <CommandItem
                 key={lead.id}
-                value={`lead-${lead.id}`}
+                value={leadItemValue(lead.id)}
                 onSelect={() => run(() => actions.openLead(lead.id))}
               >
                 <LeadAvatar name={lead.name} className="size-7 text-[10px]" />

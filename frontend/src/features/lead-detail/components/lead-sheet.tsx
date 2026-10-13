@@ -19,6 +19,14 @@ import { useLeadParam } from "@/features/leads/hooks/use-lead-param";
 import { useNow } from "@/hooks/use-now";
 import { isApiError } from "@/lib/api/problem";
 
+function focusLeadRow(leadId: string, event: Event): void {
+  const row = document.querySelector(`[data-lead-id="${CSS.escape(leadId)}"] button`);
+  if (row instanceof HTMLElement) {
+    event.preventDefault();
+    row.focus();
+  }
+}
+
 function HiddenSheetLabels() {
   return (
     <>
@@ -132,7 +140,7 @@ export function LeadSheet() {
       }}
     >
       {shownLeadId ? (
-        <SheetContent>
+        <SheetContent onCloseAutoFocus={(event) => focusLeadRow(shownLeadId, event)}>
           <LeadSheetBody key={shownLeadId} leadId={shownLeadId} />
         </SheetContent>
       ) : null}

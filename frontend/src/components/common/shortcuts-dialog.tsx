@@ -22,9 +22,7 @@ export function ShortcutsDialog({ open, onOpenChange }: ShortcutsDialogProps) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{COPY.actions.keyboardShortcuts}</DialogTitle>
-          <DialogDescription>
-            Single-key shortcuts pause while you type in a field.
-          </DialogDescription>
+          <DialogDescription>{COPY.shortcuts.description}</DialogDescription>
         </DialogHeader>
         <dl className="-mx-1 divide-y divide-border">
           {SHORTCUT_ORDER.map((id) => {

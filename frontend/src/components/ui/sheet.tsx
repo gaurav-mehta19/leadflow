@@ -3,6 +3,8 @@
 import { Dialog as SheetPrimitive } from "radix-ui";
 import type { ComponentProps } from "react";
 
+import { keepOpenWhenToastClicked } from "@/components/ui/sonner";
+import { useReturnFocus } from "@/hooks/use-return-focus";
 import { cn } from "@/lib/cn";
 
 function Sheet(props: ComponentProps<typeof SheetPrimitive.Root>) {
@@ -24,8 +26,11 @@ function SheetContent({
   className,
   children,
   onOpenAutoFocus = focusContainer,
+  onCloseAutoFocus,
+  onInteractOutside = keepOpenWhenToastClicked,
   ...props
 }: ComponentProps<typeof SheetPrimitive.Content>) {
+  const returnFocus = useReturnFocus(onOpenAutoFocus, onCloseAutoFocus);
   return (
     <SheetPrimitive.Portal>
       <SheetPrimitive.Overlay
@@ -34,7 +39,9 @@ function SheetContent({
       />
       <SheetPrimitive.Content
         data-slot="sheet-content"
-        onOpenAutoFocus={onOpenAutoFocus}
+        onOpenAutoFocus={returnFocus.onOpenAutoFocus}
+        onCloseAutoFocus={returnFocus.onCloseAutoFocus}
+        onInteractOutside={onInteractOutside}
         className={cn(
           "fixed inset-y-0 right-0 z-50 flex h-dvh w-full flex-col bg-surface shadow-sheet duration-200 ease-out outline-none data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:animate-in data-[state=open]:slide-in-from-right sm:max-w-[560px] sm:border-l",
           className,

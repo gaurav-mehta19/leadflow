@@ -51,7 +51,12 @@ export function EmptyState({
       <span className={iconVariants({ layout, tone })}>
         <Icon aria-hidden className={layout === "inline" ? "size-4" : "size-5"} />
       </span>
-      <div className={cn("flex flex-col gap-1", layout === "inline" ? "flex-1" : "max-w-sm")}>
+      <div
+        className={cn(
+          "flex flex-col gap-1",
+          layout === "inline" ? "flex-1" : "max-w-sm text-balance",
+        )}
+      >
         <p className="text-sm font-medium">{title}</p>
         {description ? <p className="text-meta text-muted-foreground">{description}</p> : null}
       </div>
