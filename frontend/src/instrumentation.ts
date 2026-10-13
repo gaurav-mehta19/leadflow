@@ -1,10 +1,6 @@
 export async function register(): Promise<void> {
-  if (
-    process.env.NEXT_RUNTIME !== "nodejs" ||
-    process.env.NEXT_PHASE === "phase-production-build"
-  ) {
-    return;
+  if (process.env.NEXT_RUNTIME === "nodejs") {
+    const { validateServerEnvironment } = await import("@/lib/server-startup");
+    validateServerEnvironment();
   }
-  const { getServerEnv } = await import("@/lib/env");
-  getServerEnv();
 }
