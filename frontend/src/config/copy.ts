@@ -126,6 +126,7 @@ export const COPY = {
     wasDue: (when: string) => `(was due ${when})`,
     followUpSetFor: (when: string) => `Follow-up set for ${when}`,
     clearedFollowUp: (when: string) => `cleared follow-up for ${when}`,
+    sheetTitle: "Lead",
     sheetDescription: "Lead details, pipeline stage and discussion timeline",
     followUpBanner: {
       overdue: (when: string) => `Follow-up was due ${when}`,

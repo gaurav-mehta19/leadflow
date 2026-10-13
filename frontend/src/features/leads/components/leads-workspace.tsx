@@ -4,6 +4,7 @@ import { type ReactNode, useMemo } from "react";
 
 import { AppHeader } from "@/components/common/app-header";
 import { ThemeToggle } from "@/components/common/theme-toggle";
+import { LeadSheet } from "@/features/lead-detail/components/lead-sheet";
 import { isPinned } from "@/features/leads/cache";
 import { FollowUpsSection } from "@/features/leads/components/follow-ups-section";
 import { LeadFilters } from "@/features/leads/components/lead-filters";
@@ -111,6 +112,7 @@ export function LeadsWorkspace() {
           onClearFilters={() => void clearFilters()}
         />
       </WorkspaceMain>
+      <LeadSheet />
     </>
   );
 }

@@ -13,9 +13,17 @@ function SheetClose(props: ComponentProps<typeof SheetPrimitive.Close>) {
   return <SheetPrimitive.Close data-slot="sheet-close" {...props} />;
 }
 
+function focusContainer(event: Event): void {
+  event.preventDefault();
+  if (event.currentTarget instanceof HTMLElement) {
+    event.currentTarget.focus();
+  }
+}
+
 function SheetContent({
   className,
   children,
+  onOpenAutoFocus = focusContainer,
   ...props
 }: ComponentProps<typeof SheetPrimitive.Content>) {
   return (
@@ -26,8 +34,9 @@ function SheetContent({
       />
       <SheetPrimitive.Content
         data-slot="sheet-content"
+        onOpenAutoFocus={onOpenAutoFocus}
         className={cn(
-          "fixed inset-y-0 right-0 z-50 flex h-dvh w-full flex-col bg-surface shadow-sheet duration-200 ease-out data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:animate-in data-[state=open]:slide-in-from-right sm:max-w-[560px] sm:border-l",
+          "fixed inset-y-0 right-0 z-50 flex h-dvh w-full flex-col bg-surface shadow-sheet duration-200 ease-out outline-none data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:animate-in data-[state=open]:slide-in-from-right sm:max-w-[560px] sm:border-l",
           className,
         )}
         {...props}
