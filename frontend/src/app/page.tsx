@@ -1,6 +1,12 @@
+import { Suspense } from "react";
+
 import { AppHeader } from "@/components/common/app-header";
-import { ThemeToggle } from "@/components/common/theme-toggle";
+import { LeadsWorkspace } from "@/features/leads/components/leads-workspace";
 
 export default function HomePage() {
-  return <AppHeader actions={<ThemeToggle />} />;
+  return (
+    <Suspense fallback={<AppHeader />}>
+      <LeadsWorkspace />
+    </Suspense>
+  );
 }
