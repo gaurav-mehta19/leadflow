@@ -104,6 +104,7 @@ export const COPY = {
     customDate: "Date",
     customTime: "Time",
     resolved: (when: string) => `Follow-up: ${when}`,
+    invalidFollowUp: "Pick a valid date and time for the follow-up.",
   },
   addLead: {
     title: "Add new lead",

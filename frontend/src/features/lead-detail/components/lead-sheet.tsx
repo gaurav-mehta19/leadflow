@@ -1,15 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { ErrorState } from "@/components/common/error-state";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { COPY } from "@/config/copy";
+import { FollowUpBanner } from "@/features/lead-detail/components/follow-up-banner";
 import { LeadSheetHeader } from "@/features/lead-detail/components/lead-sheet-header";
+import { NoteComposer } from "@/features/lead-detail/components/note-composer";
 import { Timeline } from "@/features/lead-detail/components/timeline";
 import { useLead } from "@/features/lead-detail/hooks/use-lead";
+import { useCompleteFollowUp } from "@/features/leads/hooks/use-complete-follow-up";
 import { useLeadParam } from "@/features/leads/hooks/use-lead-param";
 import { useNow } from "@/hooks/use-now";
 import { isApiError } from "@/lib/api/problem";
@@ -44,6 +47,9 @@ function LeadSheetBody({ leadId }: { leadId: string }) {
   const now = useNow();
   const { closeLead } = useLeadParam();
   const leadQuery = useLead(leadId);
+  const completeFollowUp = useCompleteFollowUp();
+  const [followUpEnabled, setFollowUpEnabled] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const lead = leadQuery.data;
   const missing = isApiError(leadQuery.error) && leadQuery.error.status === 404;
 
@@ -65,6 +71,11 @@ function LeadSheetBody({ leadId }: { leadId: string }) {
     );
   }
 
+  function reschedule() {
+    setFollowUpEnabled(true);
+    textareaRef.current?.focus();
+  }
+
   return (
     <>
       <header className="border-b px-5 pt-5 pb-4 sm:px-6">
@@ -72,9 +83,24 @@ function LeadSheetBody({ leadId }: { leadId: string }) {
       </header>
       <div className="flex-1 overflow-y-auto overscroll-contain">
         <div className="flex flex-col gap-4 px-5 pt-4 pb-6 sm:px-6">
+          <FollowUpBanner
+            lead={lead}
+            now={now}
+            completing={completeFollowUp.isPending}
+            onMarkDone={() => completeFollowUp.mutate(lead.id)}
+            onReschedule={reschedule}
+          />
           <Timeline leadId={lead.id} now={now} />
         </div>
       </div>
+      <footer className="border-t bg-surface px-5 py-4 sm:px-6">
+        <NoteComposer
+          lead={lead}
+          followUpEnabled={followUpEnabled}
+          onFollowUpEnabledChange={setFollowUpEnabled}
+          textareaRef={textareaRef}
+        />
+      </footer>
     </>
   );
 }
