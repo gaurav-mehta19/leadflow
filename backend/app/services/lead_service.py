@@ -115,8 +115,9 @@ class LeadService:
                 lead.updated_at = now
                 await self._save_lead(lead, lead.phone_normalized)
             row = await self._require_row(lead.id)
-        if changed_fields:
-            logger.info("lead.updated", lead_id=str(lead.id), fields=changed_fields)
+        detail_fields = [field for field in changed_fields if field != "status"]
+        if detail_fields:
+            logger.info("lead.updated", lead_id=str(lead.id), fields=detail_fields)
         return lead_row_view(row, now, zone)
 
     async def complete_follow_up(self, lead_id: UUID, zone: ZoneInfo) -> LeadView:
