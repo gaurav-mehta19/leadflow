@@ -27,6 +27,7 @@ export const COPY = {
   search: {
     placeholder: "Search leads by name or company",
     label: "Search leads",
+    clear: "Clear search",
   },
   sections: {
     followUps: "Follow-ups",

@@ -8,6 +8,7 @@ import type { Lead } from "@/lib/api/types";
 
 type LeadListProps = {
   leads: Lead[];
+  totalCount: number | undefined;
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
   now: Date;
@@ -18,7 +19,12 @@ type LeadListProps = {
 export function LeadList(props: LeadListProps) {
   return (
     <section aria-labelledby="all-leads-heading" className="flex flex-col gap-3">
-      <SectionHeader id="all-leads-heading" title={COPY.sections.allLeads} />
+      <SectionHeader
+        id="all-leads-heading"
+        title={COPY.sections.allLeads}
+        count={props.totalCount}
+        countLabel={props.totalCount === undefined ? undefined : `${props.totalCount} leads`}
+      />
       <ul className="flex flex-col gap-2">
         {props.leads.map((lead) => (
           <LeadRow key={lead.id} lead={lead} now={props.now} variant="list" onOpen={props.onOpen} />
