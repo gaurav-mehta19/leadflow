@@ -2,7 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 
+from app.api.openapi import OPENAPI_TAGS, LeadFlowApp
 from app.core.config import Settings, get_settings
+from app.core.error_handlers import register_error_handlers
 from app.core.logging import configure_logging
 from app.core.middleware import REQUEST_ID_HEADER, RequestContextMiddleware
 
@@ -11,12 +13,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     resolved = settings or get_settings()
     configure_logging(resolved)
 
-    app = FastAPI(
+    app = LeadFlowApp(
         title=resolved.app_name,
         version=resolved.app_version,
         description="Track leads, log every discussion and never miss a follow-up.",
+        openapi_tags=OPENAPI_TAGS,
     )
     app.state.settings = resolved
+
+    register_error_handlers(app)
 
     app.add_middleware(GZipMiddleware, minimum_size=1024)
     app.add_middleware(
