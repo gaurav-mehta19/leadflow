@@ -1,4 +1,6 @@
-from sqlalchemy import MetaData
+from enum import StrEnum
+
+from sqlalchemy import Enum, MetaData
 from sqlalchemy.orm import DeclarativeBase
 
 NAMING_CONVENTION = {
@@ -12,3 +14,14 @@ NAMING_CONVENTION = {
 
 class Base(DeclarativeBase):
     metadata = MetaData(naming_convention=NAMING_CONVENTION)
+
+
+def string_enum[E: StrEnum](enum_class: type[E], length: int) -> Enum:
+    return Enum(
+        enum_class,
+        native_enum=False,
+        create_constraint=False,
+        length=length,
+        values_callable=lambda members: [member.value for member in members],
+        validate_strings=True,
+    )
