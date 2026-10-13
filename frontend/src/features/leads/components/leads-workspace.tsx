@@ -4,9 +4,13 @@ import { type ReactNode, useMemo } from "react";
 
 import { AppHeader } from "@/components/common/app-header";
 import { ThemeToggle } from "@/components/common/theme-toggle";
+import { isPinned } from "@/features/leads/cache";
+import { FollowUpsSection } from "@/features/leads/components/follow-ups-section";
 import { LeadFilters } from "@/features/leads/components/lead-filters";
 import { LeadList } from "@/features/leads/components/lead-list";
 import { LeadSearch } from "@/features/leads/components/lead-search";
+import { useCompleteFollowUp } from "@/features/leads/hooks/use-complete-follow-up";
+import { useFollowUps } from "@/features/leads/hooks/use-follow-ups";
 import { useLeadFilters } from "@/features/leads/hooks/use-lead-filters";
 import { useLeadParam } from "@/features/leads/hooks/use-lead-param";
 import { useLeadStats } from "@/features/leads/hooks/use-lead-stats";
@@ -26,18 +30,28 @@ export function LeadsWorkspace() {
   const { status, search, filters, setStatus, setSearch } = useLeadFilters();
   const { openLead } = useLeadParam();
   const leadsQuery = useLeads(filters);
+  const followUpsQuery = useFollowUps(filters);
   const statsQuery = useLeadStats(filters.q);
-  const leads = useMemo(
-    () => leadsQuery.data?.pages.flatMap((page) => page.items) ?? [],
+  const completeFollowUp = useCompleteFollowUp();
+
+  const followUps = followUpsQuery.data;
+  const pinnedCount = (followUps?.overdue.length ?? 0) + (followUps?.today.length ?? 0);
+  const listLeads = useMemo(
+    () =>
+      (leadsQuery.data?.pages.flatMap((page) => page.items) ?? []).filter(
+        (lead) => !isPinned(lead),
+      ),
     [leadsQuery.data],
   );
 
   const stats = statsQuery.data;
-  const totalCount = stats
+  const filteredTotal = stats
     ? filters.status
       ? stats.by_status[filters.status]
       : stats.total
     : undefined;
+  const listCount =
+    filteredTotal === undefined ? undefined : Math.max(0, filteredTotal - pinnedCount);
 
   return (
     <>
@@ -51,9 +65,18 @@ export function LeadsWorkspace() {
           stats={stats}
           onStatusChange={(next) => void setStatus(next)}
         />
+        <FollowUpsSection
+          data={followUps}
+          now={now}
+          completingLeadId={
+            completeFollowUp.isPending ? (completeFollowUp.variables ?? null) : null
+          }
+          onOpen={(lead) => void openLead(lead.id)}
+          onComplete={(lead) => completeFollowUp.mutate(lead.id)}
+        />
         <LeadList
-          leads={leads}
-          totalCount={totalCount}
+          leads={listLeads}
+          totalCount={listCount}
           hasNextPage={leadsQuery.hasNextPage}
           isFetchingNextPage={leadsQuery.isFetchingNextPage}
           now={now}

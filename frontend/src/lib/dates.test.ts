@@ -5,6 +5,7 @@ import {
   defaultCustomFollowUp,
   describeWhen,
   followUpPillLabel,
+  followUpStateAt,
   formatRelative,
   lateBy,
   parseLocalDateTime,
@@ -128,5 +129,18 @@ describe("custom follow-up helpers", () => {
 
   it("serialises with the local UTC offset", () => {
     expect(toOffsetIso(at(5, 10))).toBe("2026-05-05T10:00:00+05:30");
+  });
+});
+
+describe("followUpStateAt", () => {
+  it.each([
+    [null, "none"],
+    [at(3, 23, 59), "overdue"],
+    [at(4, 0, 0), "today"],
+    [at(4, 9, 0), "today"],
+    [at(4, 23, 59), "today"],
+    [at(5, 0, 0), "upcoming"],
+  ] as const)("classifies %s as %s", (value, expected) => {
+    expect(followUpStateAt(value, MONDAY_1PM)).toBe(expected);
   });
 });

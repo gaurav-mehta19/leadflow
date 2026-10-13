@@ -147,6 +147,17 @@ export function followUpPillLabel(value: DateInput, state: FollowUpState, now: D
   }
 }
 
+export function followUpStateAt(value: DateInput | null, now: Date): FollowUpState {
+  if (value === null) {
+    return "none";
+  }
+  const daysAhead = differenceInCalendarDays(toDate(value), now);
+  if (daysAhead < 0) {
+    return "overdue";
+  }
+  return daysAhead === 0 ? "today" : "upcoming";
+}
+
 export function isLate(value: DateInput, state: FollowUpState, now: Date): boolean {
   return state === "overdue" || (state === "today" && lateBy(value, now) !== null);
 }
