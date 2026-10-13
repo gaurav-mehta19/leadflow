@@ -1,17 +1,20 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { useTheme } from "next-themes";
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { AppHeader } from "@/components/common/app-header";
 import { KeyCombo } from "@/components/common/kbd";
+import { ShortcutsDialog } from "@/components/common/shortcuts-dialog";
 import { ThemeToggle } from "@/components/common/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { COPY } from "@/config/copy";
 import { TIMING } from "@/config/limits";
 import { SHORTCUTS } from "@/config/shortcuts";
+import { CommandPalette, type PaletteActions } from "@/features/command-palette/command-palette";
 import { LeadSheet } from "@/features/lead-detail/components/lead-sheet";
 import { isPinned } from "@/features/leads/cache";
 import { AddLeadDialog } from "@/features/leads/components/add-lead-dialog";
@@ -27,8 +30,12 @@ import { useLeadFilters } from "@/features/leads/hooks/use-lead-filters";
 import { useLeadParam } from "@/features/leads/hooks/use-lead-param";
 import { useLeadStats } from "@/features/leads/hooks/use-lead-stats";
 import { useLeads } from "@/features/leads/hooks/use-leads";
+import { useListNavigation } from "@/features/leads/hooks/use-list-navigation";
+import { useAppHotkeys } from "@/hooks/use-app-hotkeys";
 import { useNow } from "@/hooks/use-now";
 import type { Lead } from "@/lib/api/types";
+
+const FOLLOW_UPS_HEADING_ID = "follow-ups-heading";
 
 function WorkspaceMain({ children }: { children: ReactNode }) {
   return (
@@ -68,18 +75,26 @@ export function LeadsWorkspaceFallback() {
 
 export function LeadsWorkspace() {
   const now = useNow();
+  const { resolvedTheme, setTheme } = useTheme();
+  const searchRef = useRef<HTMLInputElement>(null);
   const [addOpen, setAddOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [highlightedLeadId, setHighlightedLeadId] = useState<string | null>(null);
+
   const { status, search, filters, hasFilters, setStatus, setSearch, clearFilters } =
     useLeadFilters();
-  const { openLead } = useLeadParam();
+  const { leadId, openLead } = useLeadParam();
   const leadsQuery = useLeads(filters);
   const followUpsQuery = useFollowUps(filters);
   const statsQuery = useLeadStats(filters.q);
   const completeFollowUp = useCompleteFollowUp();
 
   const followUps = followUpsQuery.data;
-  const pinnedCount = (followUps?.overdue.length ?? 0) + (followUps?.today.length ?? 0);
+  const pinnedLeads = useMemo(
+    () => [...(followUps?.overdue ?? []), ...(followUps?.today ?? [])],
+    [followUps],
+  );
   const listLeads = useMemo(
     () =>
       (leadsQuery.data?.pages.flatMap((page) => page.items) ?? []).filter(
@@ -87,6 +102,12 @@ export function LeadsWorkspace() {
       ),
     [leadsQuery.data],
   );
+  const orderedIds = useMemo(
+    () => [...pinnedLeads, ...listLeads].map((lead) => lead.id),
+    [pinnedLeads, listLeads],
+  );
+  const { selectedId, registerRow, select, selectNext, selectPrevious } =
+    useListNavigation(orderedIds);
 
   const stats = statsQuery.data;
   const filteredTotal = stats
@@ -95,7 +116,7 @@ export function LeadsWorkspace() {
       : stats.total
     : undefined;
   const listCount =
-    filteredTotal === undefined ? undefined : Math.max(0, filteredTotal - pinnedCount);
+    filteredTotal === undefined ? undefined : Math.max(0, filteredTotal - pinnedLeads.length);
 
   useEffect(() => {
     if (highlightedLeadId === null) {
@@ -105,20 +126,62 @@ export function LeadsWorkspace() {
     return () => clearTimeout(timeout);
   }, [highlightedLeadId]);
 
+  const open = useCallback(
+    (id: string) => {
+      select(id);
+      void openLead(id);
+    },
+    [select, openLead],
+  );
+
   const handleCreated = useCallback(
     (lead: Lead) => {
       setHighlightedLeadId(lead.id);
       toast.success(COPY.toasts.leadCreated, {
-        action: { label: COPY.actions.open, onClick: () => void openLead(lead.id) },
+        action: { label: COPY.actions.open, onClick: () => open(lead.id) },
       });
     },
-    [openLead],
+    [open],
+  );
+
+  const paletteActions = useMemo<PaletteActions>(
+    () => ({
+      addLead: () => setAddOpen(true),
+      showOverdue: () => {
+        void clearFilters();
+        document
+          .getElementById(FOLLOW_UPS_HEADING_ID)
+          ?.scrollIntoView({ block: "start", behavior: "smooth" });
+      },
+      filterByStatus: (next) => void setStatus(next),
+      toggleTheme: () => setTheme(resolvedTheme === "dark" ? "light" : "dark"),
+      showShortcuts: () => setShortcutsOpen(true),
+      openLead: open,
+    }),
+    [clearFilters, setStatus, setTheme, resolvedTheme, open],
+  );
+
+  useAppHotkeys(
+    {
+      focusSearch: () => searchRef.current?.focus(),
+      newLead: () => setAddOpen(true),
+      openCommandPalette: () => setPaletteOpen(true),
+      nextLead: selectNext,
+      previousLead: selectPrevious,
+      openSelectedLead: () => {
+        if (selectedId) {
+          open(selectedId);
+        }
+      },
+      showShortcuts: () => setShortcutsOpen(true),
+    },
+    !addOpen && !paletteOpen && !shortcutsOpen && leadId === null,
   );
 
   return (
     <>
       <AppHeader
-        search={<LeadSearch value={search} onChange={setSearch} />}
+        search={<LeadSearch value={search} onChange={setSearch} inputRef={searchRef} />}
         actions={
           <>
             <ThemeToggle />
@@ -134,16 +197,19 @@ export function LeadsWorkspace() {
           onStatusChange={(next) => void setStatus(next)}
         />
         <FollowUpsSection
+          headingId={FOLLOW_UPS_HEADING_ID}
           data={followUps}
           error={followUpsQuery.error}
           isPending={followUpsQuery.isPending}
           isRefetching={followUpsQuery.isRefetching}
           now={now}
+          selectedLeadId={selectedId}
           completingLeadId={
             completeFollowUp.isPending ? (completeFollowUp.variables ?? null) : null
           }
+          registerRow={registerRow}
           onRetry={() => void followUpsQuery.refetch()}
-          onOpen={(lead) => void openLead(lead.id)}
+          onOpen={(lead) => open(lead.id)}
           onComplete={(lead) => completeFollowUp.mutate(lead.id)}
         />
         <LeadList
@@ -151,17 +217,19 @@ export function LeadsWorkspace() {
           totalCount={listCount}
           filters={filters}
           isFirstUse={!hasFilters && stats?.total === 0}
-          hasPinnedMatches={pinnedCount > 0}
+          hasPinnedMatches={pinnedLeads.length > 0}
           error={leadsQuery.error}
           isPending={leadsQuery.isPending}
           isRefetching={leadsQuery.isRefetching}
           hasNextPage={leadsQuery.hasNextPage}
           isFetchingNextPage={leadsQuery.isFetchingNextPage}
           now={now}
+          selectedLeadId={selectedId}
           highlightedLeadId={highlightedLeadId}
+          registerRow={registerRow}
           onRetry={() => void leadsQuery.refetch()}
           onLoadMore={() => void leadsQuery.fetchNextPage()}
-          onOpen={(lead) => void openLead(lead.id)}
+          onOpen={(lead) => open(lead.id)}
           onAddLead={() => setAddOpen(true)}
           onClearFilters={() => void clearFilters()}
         />
@@ -171,8 +239,10 @@ export function LeadsWorkspace() {
         open={addOpen}
         onOpenChange={setAddOpen}
         onCreated={handleCreated}
-        onOpenExisting={(leadId) => void openLead(leadId)}
+        onOpenExisting={open}
       />
+      <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} actions={paletteActions} />
+      <ShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
     </>
   );
 }

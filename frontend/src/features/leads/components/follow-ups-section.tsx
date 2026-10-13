@@ -12,12 +12,15 @@ import type { FollowUps, Lead } from "@/lib/api/types";
 import { cn } from "@/lib/cn";
 
 type FollowUpsSectionProps = {
+  headingId: string;
   data: FollowUps | undefined;
   error: unknown;
   isPending: boolean;
   isRefetching: boolean;
   now: Date;
+  selectedLeadId: string | null;
   completingLeadId: string | null;
+  registerRow: (leadId: string) => (element: HTMLLIElement | null) => void;
   onRetry: () => void;
   onOpen: (lead: Lead) => void;
   onComplete: (lead: Lead) => void;
@@ -25,7 +28,7 @@ type FollowUpsSectionProps = {
 
 type GroupProps = Pick<
   FollowUpsSectionProps,
-  "now" | "completingLeadId" | "onOpen" | "onComplete"
+  "now" | "selectedLeadId" | "completingLeadId" | "registerRow" | "onOpen" | "onComplete"
 > & {
   id: string;
   label: string;
@@ -53,7 +56,9 @@ function FollowUpGroup({ id, label, leads, tone, ...rowProps }: GroupProps) {
             lead={lead}
             now={rowProps.now}
             variant="pinned"
+            selected={rowProps.selectedLeadId === lead.id}
             completing={rowProps.completingLeadId === lead.id}
+            rowRef={rowProps.registerRow(lead.id)}
             onOpen={rowProps.onOpen}
             onComplete={rowProps.onComplete}
           />
@@ -64,6 +69,7 @@ function FollowUpGroup({ id, label, leads, tone, ...rowProps }: GroupProps) {
 }
 
 export function FollowUpsSection({
+  headingId,
   data,
   error,
   isPending,
@@ -79,9 +85,9 @@ export function FollowUpsSection({
   const total = overdue.length + today.length;
 
   return (
-    <section aria-labelledby="follow-ups-heading" className="flex flex-col gap-3">
+    <section aria-labelledby={headingId} className="flex scroll-mt-24 flex-col gap-3">
       <SectionHeader
-        id="follow-ups-heading"
+        id={headingId}
         title={COPY.sections.followUps}
         subtitle={COPY.sections.followUpsSubtitle}
         count={data ? total : undefined}

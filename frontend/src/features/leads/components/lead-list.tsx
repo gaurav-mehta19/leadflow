@@ -25,7 +25,9 @@ type LeadListProps = {
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
   now: Date;
+  selectedLeadId: string | null;
   highlightedLeadId: string | null;
+  registerRow: (leadId: string) => (element: HTMLLIElement | null) => void;
   onRetry: () => void;
   onLoadMore: () => void;
   onOpen: (lead: Lead) => void;
@@ -99,7 +101,9 @@ function ListBody(props: LeadListProps) {
             lead={lead}
             now={props.now}
             variant="list"
+            selected={props.selectedLeadId === lead.id}
             highlighted={props.highlightedLeadId === lead.id}
+            rowRef={props.registerRow(lead.id)}
             onOpen={props.onOpen}
           />
         ))}
