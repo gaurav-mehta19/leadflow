@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.routing import APIRoute
 
 from app.api.openapi import OPENAPI_TAGS, LeadFlowApp
 from app.api.router import api_router
@@ -15,6 +16,10 @@ from app.core.logging import configure_logging, get_logger
 from app.core.middleware import REQUEST_ID_HEADER, RequestContextMiddleware
 
 logger = get_logger("app.main")
+
+
+def operation_id(route: APIRoute) -> str:
+    return route.name
 
 
 @asynccontextmanager
@@ -39,6 +44,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         version=resolved.app_version,
         description="Track leads, log every discussion and never miss a follow-up.",
         openapi_tags=OPENAPI_TAGS,
+        generate_unique_id_function=operation_id,
         lifespan=lifespan,
     )
     app.state.settings = resolved
