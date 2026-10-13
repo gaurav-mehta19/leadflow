@@ -1,6 +1,244 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --background: oklch(0.985 0.003 210);
+  --surface: oklch(1 0 0);
+  --surface-muted: oklch(0.97 0.004 210);
+  --surface-sunken: oklch(0.955 0.005 210);
+  --foreground: oklch(0.22 0.02 235);
+  --muted-foreground: oklch(0.5 0.02 235);
+  --border: oklch(0.915 0.006 225);
+  --border-strong: oklch(0.86 0.008 225);
+  --input: oklch(0.62 0.012 230);
+  --primary: oklch(0.47 0.1 195);
+  --primary-hover: oklch(0.42 0.1 195);
+  --primary-foreground: oklch(0.985 0.01 195);
+  --primary-soft: oklch(0.95 0.03 195);
+  --ring: oklch(0.55 0.11 195);
+  --danger: oklch(0.55 0.2 25);
+  --danger-soft: oklch(0.96 0.03 25);
+  --warning: oklch(0.52 0.12 65);
+  --warning-soft: oklch(0.965 0.05 85);
+  --success: oklch(0.5 0.12 155);
+  --success-soft: oklch(0.96 0.04 155);
+  --status-new: oklch(0.47 0.13 240);
+  --status-new-soft: oklch(0.95 0.03 235);
+  --status-contacted: oklch(0.5 0.11 65);
+  --status-contacted-soft: oklch(0.965 0.05 85);
+  --status-qualified: oklch(0.47 0.16 295);
+  --status-qualified-soft: oklch(0.955 0.035 295);
+  --status-proposal: oklch(0.49 0.16 350);
+  --status-proposal-soft: oklch(0.955 0.035 350);
+  --status-won: oklch(0.45 0.11 155);
+  --status-won-soft: oklch(0.955 0.045 155);
+  --status-lost: oklch(0.5 0.012 250);
+  --status-lost-soft: oklch(0.95 0.005 250);
+  --avatar-1: oklch(0.9 0.05 195);
+  --avatar-2: oklch(0.9 0.05 240);
+  --avatar-3: oklch(0.9 0.05 295);
+  --avatar-4: oklch(0.9 0.05 350);
+  --avatar-5: oklch(0.91 0.06 85);
+  --avatar-6: oklch(0.9 0.05 155);
+  --avatar-foreground: oklch(0.3 0.03 235);
+  --overlay: oklch(0.2 0.02 235 / 0.4);
+  --radius: 0.625rem;
+}
+
+.dark {
+  --background: oklch(0.17 0.012 235);
+  --surface: oklch(0.205 0.014 235);
+  --surface-muted: oklch(0.235 0.015 235);
+  --surface-sunken: oklch(0.15 0.012 235);
+  --foreground: oklch(0.95 0.005 235);
+  --muted-foreground: oklch(0.7 0.015 235);
+  --border: oklch(0.3 0.015 235);
+  --border-strong: oklch(0.38 0.015 235);
+  --input: oklch(0.52 0.015 235);
+  --primary: oklch(0.74 0.11 190);
+  --primary-hover: oklch(0.79 0.11 190);
+  --primary-foreground: oklch(0.18 0.02 200);
+  --primary-soft: oklch(0.3 0.05 195);
+  --ring: oklch(0.74 0.11 190);
+  --danger: oklch(0.72 0.17 25);
+  --danger-soft: oklch(0.3 0.07 25);
+  --warning: oklch(0.8 0.13 80);
+  --warning-soft: oklch(0.31 0.06 75);
+  --success: oklch(0.76 0.13 155);
+  --success-soft: oklch(0.3 0.06 155);
+  --status-new: oklch(0.8 0.1 235);
+  --status-new-soft: oklch(0.29 0.05 240);
+  --status-contacted: oklch(0.82 0.12 80);
+  --status-contacted-soft: oklch(0.3 0.05 70);
+  --status-qualified: oklch(0.8 0.12 295);
+  --status-qualified-soft: oklch(0.29 0.06 295);
+  --status-proposal: oklch(0.8 0.12 350);
+  --status-proposal-soft: oklch(0.29 0.06 350);
+  --status-won: oklch(0.8 0.12 155);
+  --status-won-soft: oklch(0.29 0.05 155);
+  --status-lost: oklch(0.72 0.01 250);
+  --status-lost-soft: oklch(0.27 0.008 250);
+  --avatar-1: oklch(0.36 0.05 195);
+  --avatar-2: oklch(0.36 0.05 240);
+  --avatar-3: oklch(0.36 0.05 295);
+  --avatar-4: oklch(0.36 0.05 350);
+  --avatar-5: oklch(0.38 0.05 80);
+  --avatar-6: oklch(0.36 0.05 155);
+  --avatar-foreground: oklch(0.94 0.01 235);
+  --overlay: oklch(0.08 0.01 235 / 0.6);
+}
 
 @theme inline {
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", monospace;
+
+  --text-meta: 0.8125rem;
+  --text-meta--line-height: 1.25rem;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-card: var(--surface);
+  --color-card-foreground: var(--foreground);
+  --color-popover: var(--surface);
+  --color-popover-foreground: var(--foreground);
+  --color-muted: var(--surface-muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-secondary: var(--surface-muted);
+  --color-secondary-foreground: var(--foreground);
+  --color-accent: var(--surface-muted);
+  --color-accent-foreground: var(--foreground);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-overlay: var(--overlay);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
+  --color-destructive: var(--danger);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-status-new: var(--status-new);
+  --color-status-new-soft: var(--status-new-soft);
+  --color-status-contacted: var(--status-contacted);
+  --color-status-contacted-soft: var(--status-contacted-soft);
+  --color-status-qualified: var(--status-qualified);
+  --color-status-qualified-soft: var(--status-qualified-soft);
+  --color-status-proposal: var(--status-proposal);
+  --color-status-proposal-soft: var(--status-proposal-soft);
+  --color-status-won: var(--status-won);
+  --color-status-won-soft: var(--status-won-soft);
+  --color-status-lost: var(--status-lost);
+  --color-status-lost-soft: var(--status-lost-soft);
+  --color-avatar-1: var(--avatar-1);
+  --color-avatar-2: var(--avatar-2);
+  --color-avatar-3: var(--avatar-3);
+  --color-avatar-4: var(--avatar-4);
+  --color-avatar-5: var(--avatar-5);
+  --color-avatar-6: var(--avatar-6);
+  --color-avatar-foreground: var(--avatar-foreground);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --shadow-float: 0 1px 2px oklch(0.2 0.02 235 / 0.06), 0 8px 24px oklch(0.2 0.02 235 / 0.1);
+  --shadow-sheet: -12px 0 40px oklch(0.2 0.02 235 / 0.14);
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --animate-row-in: row-in 180ms var(--ease-out-soft);
+  --animate-highlight: highlight 2.4s ease-out;
+
+  @keyframes row-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes highlight {
+    0%,
+    40% {
+      background-color: var(--primary-soft);
+    }
+    100% {
+      background-color: transparent;
+    }
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    color-scheme: light;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-background font-sans text-sm text-foreground antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
+
+  ::selection {
+    background-color: var(--primary-soft);
+  }
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility edge-fade-x {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 12px,
+    black calc(100% - 24px),
+    transparent
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
