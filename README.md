@@ -12,8 +12,6 @@ A single-screen lead manager for sales reps: track every lead, log each discussi
 | **Command palette** | **Mobile (390 px)** |
 | ![Command palette searching leads](docs/screenshots/07-command-palette.png) | ![Mobile layout](docs/screenshots/06-mobile.png) |
 
-Demo video: _add link here_
-
 ---
 
 ## Features
